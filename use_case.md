@@ -249,7 +249,6 @@ A --> UC20
 %% ===== INCLUDE / EXTEND =====
 UC1 ..> : include UC3
 UC2 ..> : include UC3
-UC5 ..> : include UC2
 UC6 ..> : include UC7
 UC8 ..> : include UC6
 UC11 ..> : include UC10
