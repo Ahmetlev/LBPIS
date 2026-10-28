@@ -175,7 +175,7 @@
 
 ```mermaid
 usecase-beta
-direction TB
+direction LR
 
 %% ===== АКТОРЫ =====
 actor U("Пользователь")
