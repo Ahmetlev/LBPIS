@@ -1,4 +1,4 @@
-# Лабораторная работа № 1. Диаграмма прецедентов
+<img width="1206" height="795" alt="image" src="https://github.com/user-attachments/assets/b469a30e-81f4-4a7a-8d75-36144d0f76c4" /># Лабораторная работа № 1. Диаграмма прецедентов
 
 ## Тема
 
@@ -175,7 +175,7 @@
 
 ```mermaid
 usecase-beta
-direction LR
+direction TB
 
 %% ===== АКТОРЫ =====
 actor U("Пользователь системы")
