@@ -14,73 +14,73 @@ erDiagram
     REVIEW ||..o{ FINDING : records
 
     USER {
-        uuid user_id PK
+        uuid user_id PK "ИД пользователя"
         string phone UK "Уникальный телефон или логин"
         string role "Заявитель, Сотрудник или Админ"
         string password "Хеш пароля для служебных ролей"
-        datetime registered_at
+        datetime registered_at "Дата регистрации"
     }
     APPLICATION {
-        uuid application_id PK
-        uuid applicant_id FK
-        uuid slot_id FK
-        string entry_goal "Работа или не работа"
-        date entry_date
-        boolean has_previous_fingerprinting
-        string current_status "Подана, На проверке, Требует дополнения, Завершена"
+        uuid application_id PK "ИД заявки"
+        uuid applicant_id FK  "ИД заявителя"
+        uuid slot_id FK      "ИД слота"
+        string entry_goal "Цель въезда"
+        date entry_date "Дата въезда"
+        boolean has_previous_fingerprinting "Была ли дактилоскопия"
+        string current_status "Текущий статус"
         date calculated_deadline "Дедлайн (30 или 90 дней)"
-        datetime submitted_at
+        datetime submitted_at "Дата подачи"
     }
     DOCUMENT {
-        uuid document_id PK
-        uuid application_id FK
-        string document_kind "Паспорт, Миграционная карта, Виза"
-        string file_name
-        string media_type
-        bytes file_content
-        datetime attached_at
+        uuid document_id PK "ИД документа"
+        uuid application_id FK "ИД заявки"
+        string document_kind "Тип документа"
+        string file_name  "Имя файла"
+        string media_type  "Формат файла"
+        bytes file_content "Содержимое"
+        datetime attached_at "Дата загрузки"
     }
     REVIEW {
-        uuid review_id PK
-        uuid application_id FK
-        uuid specialist_id FK
-        string state "Открыта, Оценка сохранена, Завершена"
-        datetime started_at
-        datetime assessed_at "NULL до сохранения оценки"
+        uuid review_id PK "ИД проверки"
+        uuid application_id FK "ИД заявки"
+        uuid specialist_id FK  "ИД сотрудника"
+        string state "Состояние"
+        datetime started_at "Дата начала"
+        datetime assessed_at "Дата окончания"
     }
     FINDING {
-        uuid finding_id PK
-        uuid review_id FK
-        string assessment "Соответствует или Требует исправления"
-        string comment
+        uuid finding_id PK "ИД замечания"
+        uuid review_id FK "ИД проверки"
+        string assessment "Оценка"
+        string comment "Комментарий"
     }
     RESULT {
-        uuid result_id PK
-        uuid application_id FK, UK
+        uuid result_id PK "ИД результата"
+        uuid application_id FK, UK "ИД заявки"
         string record_number "Номер записи о прохождении"
         date completed_at "Дата прохождения процедуры"
-        datetime issued_at
+        datetime issued_at "Дата выдачи"
     }
     DIVISION {
-        uuid division_id PK
+        uuid division_id PK "ИД подразделения"
         string name "Название подразделения МВД/ПВС"
-        string address
-        string phone
-        string work_hours
+        string address "Адрес"
+        string phone "Телефон"
+        string work_hours "Часы работы"
     }
     SLOT {
-        uuid slot_id PK
-        uuid division_id FK
-        datetime slot_time
-        boolean is_available
+        uuid slot_id PK  "ИД слота"
+        uuid division_id FK "ИД подразделения"
+        datetime slot_time "Время слота"
+        boolean is_available "Доступен?"
     }
     STATUS_EVENT {
-        uuid event_id PK
-        uuid application_id FK
-        uuid initiator_id FK
-        int event_number "Уникален внутри заявки"
-        string previous_status "NULL у первого события"
-        string new_status
-        datetime occurred_at
-        string comment
+        uuid event_id PK "ИД события"
+        uuid application_id FK "ИД заявки"
+        uuid initiator_id FK "ИД инициатора"
+        int event_number "Номер события"
+        string previous_status "Старый статус"
+        string new_status "Новый статус"
+        datetime occurred_at "Дата события"
+        string comment "Комментарий"
     }
