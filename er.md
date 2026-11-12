@@ -22,11 +22,11 @@ erDiagram
     }
     APPLICATION {
         uuid application_id PK "ИД заявки"
-        uuid applicant_id FK  "ИД заявителя"
-        uuid slot_id FK      "ИД слота"
-        string entry_goal "Цель въезда (Работа / Не работа)"
-        int planned_stay_days "Планируемое количество дней пребывания"
-        boolean applies_for_patent "Подает ли на патент (только для работы)"
+        uuid applicant_id FK "ИД заявителя"
+        uuid slot_id FK "ИД слота"
+        string entry_goal "Цель въезда"
+        int planned_stay_days "Планируемое пребывание (в днях)"
+        boolean applies_for_patent "Подает ли на патент"
         date entry_date "Дата въезда"
         boolean has_previous_fingerprinting "Была ли дактилоскопия"
         string current_status "Текущий статус"
@@ -37,15 +37,15 @@ erDiagram
         uuid document_id PK "ИД документа"
         uuid application_id FK "ИД заявки"
         string document_kind "Тип документа"
-        string file_name  "Имя файла"
-        string media_type  "Формат файла"
+        string file_name "Имя файла"
+        string media_type "Формат файла"
         bytes file_content "Содержимое"
         datetime attached_at "Дата загрузки"
     }
     REVIEW {
         uuid review_id PK "ИД проверки"
         uuid application_id FK "ИД заявки"
-        uuid specialist_id FK  "ИД сотрудника"
+        uuid specialist_id FK "ИД сотрудника"
         string state "Состояние"
         datetime started_at "Дата начала"
         datetime assessed_at "Дата окончания"
@@ -60,18 +60,18 @@ erDiagram
         uuid result_id PK "ИД результата"
         uuid application_id FK, UK "ИД заявки"
         string record_number "Номер записи о прохождении"
-        date completed_at "Дата прохождения процедуры"
+        date completed_at "Дата прохождения"
         datetime issued_at "Дата выдачи"
     }
     DIVISION {
         uuid division_id PK "ИД подразделения"
-        string name "Название подразделения МВД/ПВС"
+        string name "Название подразделения"
         string address "Адрес"
         string phone "Телефон"
         string work_hours "Часы работы"
     }
     SLOT {
-        uuid slot_id PK  "ИД слота"
+        uuid slot_id PK "ИД слота"
         uuid division_id FK "ИД подразделения"
         datetime slot_time "Время слота"
         boolean is_available "Доступен?"
