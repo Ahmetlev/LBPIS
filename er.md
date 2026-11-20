@@ -2,7 +2,7 @@
 
 ## Границы модели
 
-Модель описывает сервис сопровождения дактилоскопической регистрации и фотографирования по пунктам 2.1–2.2 дорожной карты: анкета, применимая ветка, крайний срок, заявление, удостоверение личности и другие приложения, запись, проверки, замечания, история статусов и подтверждение обеих процедур.
+Модель описывает сервис сопровождения дактилоскопической регистрации и фотографирования по пунктам 2.1–2.2 дорожной карты  анкета, применимая ветка, крайний срок, заявление, удостоверение личности и другие приложения, запись, проверки, замечания, история статусов и подтверждение обеих процедур.
 
 Процедуры выполняются офлайн. Система хранит факт выполнения, дату, подразделение, номер записи и использованное оборудование, но не сами отпечатки, биометрические шаблоны или изображение лица.
 
@@ -10,28 +10,28 @@
 
 ```mermaid
 erDiagram
-    USER ||..o{ APPLICATION : submits
-    USER ||..o{ REVIEW : performs
-    USER ||..o{ STATUS_EVENT : initiates
-    USER ||..o{ PROCEDURE_RECORD : records
-    APPLICATION ||..|{ APPLICATION_VERSION : has_versions
-    APPLICATION ||..|{ STATUS_EVENT : has_history
-    APPLICATION ||..o{ APPOINTMENT : books
-    APPLICATION ||..o{ REVIEW : undergoes
-    APPLICATION ||..o| PROCEDURE_RECORD : has_procedure
-    APPLICATION_VERSION ||..|{ REQUIREMENT : defines
-    APPLICATION_VERSION ||..o{ DOCUMENT : includes
-    REQUIREMENT ||..o{ DOCUMENT : supported_by
-    REVIEW ||..o{ FINDING : records
-    REVIEW ||..o| SUPPLEMENT_REQUEST : creates
-    SUPPLEMENT_REQUEST o|..o| APPLICATION_VERSION : answered_by
-    REQUIREMENT ||..o{ FINDING : assessed_as
-    DOCUMENT o|..o{ FINDING : assessed_document
-    DIVISION ||..o{ SLOT : offers
-    SLOT ||..o| APPOINTMENT : reserved_for
-    APPOINTMENT ||..o| PROCEDURE_RECORD : precedes
-    PROCEDURE_RECORD ||..|{ PROCEDURE_ACTION : consists_of
-    DEVICE ||..o{ PROCEDURE_ACTION : used_for
+    USER ||..o{ APPLICATION   submits
+    USER ||..o{ REVIEW   performs
+    USER ||..o{ STATUS_EVENT   initiates
+    USER ||..o{ PROCEDURE_RECORD   records
+    APPLICATION ||..|{ APPLICATION_VERSION   has_versions
+    APPLICATION ||..|{ STATUS_EVENT   has_history
+    APPLICATION ||..o{ APPOINTMENT   books
+    APPLICATION ||..o{ REVIEW   undergoes
+    APPLICATION ||..o| PROCEDURE_RECORD   has_procedure
+    APPLICATION_VERSION ||..|{ REQUIREMENT   defines
+    APPLICATION_VERSION ||..o{ DOCUMENT   includes
+    REQUIREMENT ||..o{ DOCUMENT   supported_by
+    REVIEW ||..o{ FINDING   records
+    REVIEW ||..o| SUPPLEMENT_REQUEST   creates
+    SUPPLEMENT_REQUEST o|..o| APPLICATION_VERSION   answered_by
+    REQUIREMENT ||..o{ FINDING   assessed_as
+    DOCUMENT o|..o{ FINDING   assessed_document
+    DIVISION ||..o{ SLOT   offers
+    SLOT ||..o| APPOINTMENT   reserved_for
+    APPOINTMENT ||..o| PROCEDURE_RECORD   precedes
+    PROCEDURE_RECORD ||..|{ PROCEDURE_ACTION   consists_of
+    DEVICE ||..o{ PROCEDURE_ACTION   used_for
 
     USER {
         uuid user_id PK
@@ -180,7 +180,7 @@ erDiagram
 | `APPOINTMENT` | Запись заявки на слот, отдельная сущность сохраняет отмены и повторные записи. |
 | `DIVISION`, `SLOT` | Справочники подразделений и доступных интервалов. |
 | `DEVICE` | Справочник оборудования. |
-| `PROCEDURE_RECORD` | Сводная запись о фактическом прохождении процедур: номер записи, дата и сотрудник. |
+| `PROCEDURE_RECORD` | Сводная запись о фактическом прохождении процедур  номер записи, дата и сотрудник. |
 | `PROCEDURE_ACTION` | Отдельное действие — дактилоскопия или фотографирование. Каждое действие ссылается на конкретный прибор. |
 | `STATUS_EVENT` | Неизменяемое событие истории статусов. |
 
@@ -195,7 +195,7 @@ erDiagram
 - Проверка создаёт не более одного запроса дополнения, запрос может иметь 0..1 ответную версию, а исправленная версия ссылается не более чем на один запрос.
 - У заявки 0..N записей на приём, один слот может иметь не более одной активной записи.
 - У подразделения 0..N слотов, каждый слот принадлежит одному подразделению.
-- У заявки 0..1 итоговая запись процедуры, в ней должны присутствовать два действия: `FINGERPRINTING` и `PHOTOGRAPHING`.
+- У заявки 0..1 итоговая запись процедуры, в ней должны присутствовать два действия  `FINGERPRINTING` и `PHOTOGRAPHING`.
 - Каждое действие процедуры использует ровно одно устройство. Одно устройство может использоваться во многих действиях.
 - У заявки 1..N событий истории, уникальна пара `(application_id, event_number)`.
 
@@ -203,9 +203,9 @@ erDiagram
 
 ### 1. Применимость
 
-- **Пункт 2.1:** `entry_goal = WORK`. Если `has_previous_procedure = true`, повторная процедура по этой ветке не требуется и заявка не создаётся. Если `false`, заявка может быть подана.
-- **Пункт 2.2:** `entry_goal = OTHER` и `planned_stay_days > 90`. Признак `has_previous_procedure` не блокирует эту ветку: дорожная карта устанавливает ограничение предыдущего прохождения только для п. 2.1.
-- Иная цель и пребывание не более 90 дней: услуга по п. 2.2 не применяется.
+- **Пункт 2.1 ** `entry_goal = WORK`. Если `has_previous_procedure = true`, повторная процедура по этой ветке не требуется и заявка не создаётся. Если `false`, заявка может быть подана.
+- **Пункт 2.2 ** `entry_goal = OTHER` и `planned_stay_days > 90`. Признак `has_previous_procedure` не блокирует эту ветку  дорожная карта устанавливает ограничение предыдущего прохождения только для п. 2.1.
+- Иная цель и пребывание не более 90 дней  услуга по п. 2.2 не применяется.
 
 `applicable_rule` хранит `2.1` или `2.2` для принятой версии. Нельзя определять применимость только по признаку предыдущего прохождения.
 
@@ -221,7 +221,7 @@ erDiagram
 - Для каждой принятой версии создаётся обязательное требование `IDENTITY_DOCUMENT`.
 - `FINDING` ссылается на `REQUIREMENT`, а при оценке конкретного файла — также на `DOCUMENT`. Поэтому каждое замечание относится к определённому требованию и документу.
 - Уникальность `(review_id, requirement_id)` намеренно не устанавливается. Повторные оценки одного требования сохраняются отдельными строками с возрастающим `assessment_number` и временем, предыдущие оценки не перезаписываются.
-- `WARNING` не равен `CORRECTION_REQUIRED`: предупреждение о сроке не считается недостатком документа и само по себе не препятствует завершению.
+- `WARNING` не равен `CORRECTION_REQUIRED`  предупреждение о сроке не считается недостатком документа и само по себе не препятствует завершению.
 - Для запроса дополнения нужна оценка `CORRECTION_REQUIRED`. Для завершения у каждого обязательного требования должна быть последняя актуальная оценка `PASS`, предупреждения допускаются.
 
 ### 4. Запись и слоты
@@ -233,13 +233,13 @@ erDiagram
 ### 5. Очная процедура и оборудование
 
 - Дактилоскопия и фотографирование — два самостоятельных действия. Наличие только одного не позволяет завершить заявку.
-- Для каждого `PROCEDURE_ACTION` обязателен `device_id`: для дактилоскопии — `FINGERPRINT_SCANNER`, для фотографирования — `PHOTO_CAMERA`.
+- Для каждого `PROCEDURE_ACTION` обязателен `device_id`  для дактилоскопии — `FINGERPRINT_SCANNER`, для фотографирования — `PHOTO_CAMERA`.
 - Система хранит тип действия, время, исход и прибор, но не хранит отпечатки, биометрические шаблоны или изображение лица.
 - `PROCEDURE_RECORD` создаётся сотрудником после фактического прохождения обеих процедур. Повторная запись не должна создавать второй итоговый результат по заявке.
 
 ### 6. Состояния и история
 
-Основной цикл: `Подана` → `На проверке` → `Требует дополнения` → `Подана` (новая версия) → `На проверке` → `Завершена`.
+Основной цикл  `Подана` → `На проверке` → `Требует дополнения` → `Подана` (новая версия) → `На проверке` → `Завершена`.
 
 - Статус `На проверке` устанавливается в момент начала проверки, **до сохранения оценок**.
 - Сохранение оценок не переносит начало проверки на более поздний момент.
