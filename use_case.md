@@ -73,6 +73,7 @@ UC2 ..> UC3 : include
 UC8A ..> UC8B : include
 UC14 ..> UC13 : extend
 UC16 ..> UC13 : extend
+
 ```
 
 ## Содержание прецедентов
