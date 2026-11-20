@@ -14,7 +14,6 @@
 - **Пользователь системы** — обобщающий актор, а не отдельная роль. Заявитель входит по телефону и SMS-коду , сотрудник и администратор — по служебному логину и паролю. Служебные учётные записи создаются заранее.
 
 ## Диаграмма
-
 ```mermaid
 usecase-beta
 direction TB
@@ -68,11 +67,11 @@ S --> UC15
 S --> UC16
 AD --> UC17
 AD --> UC18
-UC1 ..> UC3 : include
-UC2 ..> UC3 : include
-UC8A ..> UC8B : include
-UC14 ..> UC13 : extend
-UC16 ..> UC13 : extend
+UC1 ..> : include UC3
+UC2 ..> : include UC3
+UC8A ..> : include UC8B
+UC14 ..> : extend UC13
+UC16 ..> : extend UC13
 ```
 
 ## Содержание прецедентов
