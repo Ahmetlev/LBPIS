@@ -10,28 +10,28 @@
 
 ```mermaid
 erDiagram
-    USER ||..o{ APPLICATION   submits
-    USER ||..o{ REVIEW   performs
-    USER ||..o{ STATUS_EVENT   initiates
-    USER ||..o{ PROCEDURE_RECORD   records
-    APPLICATION ||..|{ APPLICATION_VERSION   has_versions
-    APPLICATION ||..|{ STATUS_EVENT   has_history
-    APPLICATION ||..o{ APPOINTMENT   books
-    APPLICATION ||..o{ REVIEW   undergoes
-    APPLICATION ||..o| PROCEDURE_RECORD   has_procedure
-    APPLICATION_VERSION ||..|{ REQUIREMENT   defines
-    APPLICATION_VERSION ||..o{ DOCUMENT   includes
-    REQUIREMENT ||..o{ DOCUMENT   supported_by
-    REVIEW ||..o{ FINDING   records
-    REVIEW ||..o| SUPPLEMENT_REQUEST   creates
-    SUPPLEMENT_REQUEST o|..o| APPLICATION_VERSION   answered_by
-    REQUIREMENT ||..o{ FINDING   assessed_as
-    DOCUMENT o|..o{ FINDING   assessed_document
-    DIVISION ||..o{ SLOT   offers
-    SLOT ||..o| APPOINTMENT   reserved_for
-    APPOINTMENT ||..o| PROCEDURE_RECORD   precedes
-    PROCEDURE_RECORD ||..|{ PROCEDURE_ACTION   consists_of
-    DEVICE ||..o{ PROCEDURE_ACTION   used_for
+    USER ||..o{ APPLICATION : submits
+    USER ||..o{ REVIEW : performs
+    USER ||..o{ STATUS_EVENT : initiates
+    USER ||..o{ PROCEDURE_RECORD : records
+    APPLICATION ||..|{ APPLICATION_VERSION : has_versions
+    APPLICATION ||..|{ STATUS_EVENT : has_history
+    APPLICATION ||..o{ APPOINTMENT : books
+    APPLICATION ||..o{ REVIEW : undergoes
+    APPLICATION ||..o| PROCEDURE_RECORD : has_procedure
+    APPLICATION_VERSION ||..|{ REQUIREMENT : defines
+    APPLICATION_VERSION ||..o{ DOCUMENT : includes
+    REQUIREMENT ||..o{ DOCUMENT : supported_by
+    REVIEW ||..o{ FINDING : records
+    REVIEW ||..o| SUPPLEMENT_REQUEST : creates
+    SUPPLEMENT_REQUEST o|..o| APPLICATION_VERSION : answered_by
+    REQUIREMENT ||..o{ FINDING : assessed_as
+    DOCUMENT o|..o{ FINDING : assessed_document
+    DIVISION ||..o{ SLOT : offers
+    SLOT ||..o| APPOINTMENT : reserved_for
+    APPOINTMENT ||..o| PROCEDURE_RECORD : precedes
+    PROCEDURE_RECORD ||..|{ PROCEDURE_ACTION : consists_of
+    DEVICE ||..o{ PROCEDURE_ACTION : used_for
 
     USER {
         uuid user_id PK
