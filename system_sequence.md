@@ -1,5 +1,6 @@
 # Лабораторная работа № 3. Системная диаграмма последовательностей
 
+```mermaid
 sequenceDiagram
     autonumber
     actor Applicant as Заявитель
