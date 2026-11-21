@@ -145,6 +145,7 @@
 ## Диаграмма
 
 ```mermaid
+
 usecase-beta
 direction TB
 
@@ -174,6 +175,7 @@ systemBoundary SYS("Приложение Госуслуги")
   UC10("Следить за статусом")
   UC11("Узнать, что пройдена")
   UC12("Посмотреть историю")
+  UC22("Подать заявление")
 
   %%Сотрудник  
   UC13("Проверить заявление")
@@ -209,6 +211,7 @@ Z --> UC9
 Z --> UC10
 Z --> UC11
 Z --> UC12
+Z --> UC22
 
 %%СВЯЗИ СОТРУДНИКА  
 S --> UC13
@@ -226,7 +229,7 @@ A --> UC20
 UC1 ..> : include UC3
 UC2 ..> : include UC3
 UC6 ..> : include UC7
-UC16 ..> : include UC15
 UC14 ..> : extend UC13
-UC16 ..> : extend UC13
+UC22 ..> : include UC6
+UC22 ..> : include UC8
 ```
