@@ -4,76 +4,65 @@
 sequenceDiagram
     autonumber
     actor Applicant as Заявитель
-    participant Form as form:SupplementForm
-    participant Controller as controller:SupplementController
+    participant Form as form:ApplicationForm
+    participant Controller as controller:ApplicationController
     participant Auth as auth:SessionService
-    participant Service as service:SupplementService
-    participant Validator as validator:SupplementValidator
-    participant Rules as rules:ChecklistPolicy
+    participant Service as service:ApplicationService
+    participant Validator as validator:ApplicationValidator
+    participant Policy as policy:FingerprintingPolicy
     participant Store as store:ApplicationRepository
     participant Application as application:Application
 
-    Note over Applicant,Form: Заявитель открыл форму своей заявки и подготовил исправления
-    Applicant->>Form: Отправить дополнение
-    Form->>Controller: submit(sessionToken, command)
-    Controller->>Auth: require_applicant(sessionToken)
+    Note over Applicant,Application: Операция: подача заявления (UC6, UC7, UC8, UC22)
+    Note over Applicant,Form: Заявитель открыл форму услуги, заполнил анкету, приложил файлы и выбрал слот
+    Applicant->>Form: Нажать «Подать заявление»
+    Form->>Controller: submitApplication(sessionToken, command)
+    Controller->>Auth: requireApplicant(sessionToken)
     Auth-->>Controller: authResult
     alt Сеанс недействителен или роль не Заявитель
         Controller-->>Form: authenticationOrRoleError
-        Form-->>Applicant: Требуется вход заявителя
+        Form-->>Applicant: Требуется вход заявителя по телефону и SMS
     else Заявитель определён по сеансу
-        Controller->>Service: submit(applicantId, command)
-        Service->>Store: load_supplement_context(applicationId, applicantId)
-        Store-->>Service: contextOrAccessError
-        alt Заявка не найдена или принадлежит другому пользователю
-            Service-->>Controller: accessError
-        else Получен контекст своей заявки
-            Service->>Validator: validate(command, context)
-            Validator-->>Service: validationResult
-            alt Ошибки анкеты, новых файлов или выбора прежних файлов
-                Service-->>Controller: validationErrors
-            else Формальные данные корректны
-                Service->>Rules: calculate(command.questionnaire)
-                Rules-->>Service: applicabilityResult, checklist
-                alt Анкета вне условий раздела 5
-                    Service-->>Controller: notApplicable(reason)
-                else Получен перечень из трёх пунктов
-                    Service->>Store: begin_and_lock(applicationId, applicantId)
-                    Store-->>Service: lockedApplicationOrError
-                    alt Транзакция не открыта или доступ изменился
-                        Service-->>Controller: storageOrAccessError
-                    else Транзакция открыта, актуальная заявка заблокирована
-                        Service->>Application: accept_supplement(applicantId, command, checklist)
-                        Application-->>Service: changeSetOrConflict
-                        alt Статус, исходная версия или запрос неактуальны
-                            Service->>Store: rollback()
-                            Store-->>Service: rolledBack
-                            Service-->>Controller: conflictRefreshRequired
-                        else Подготовлены новая версия и переход состояния
-                            Service->>Store: save(changeSet)
-                            Store-->>Service: saveResult
-                            alt Ошибка записи
-                                Service->>Store: rollback()
-                                Store-->>Service: rolledBack
-                                Service-->>Controller: storageError
-                            else Записи подготовлены в транзакции
-                                Service->>Store: commit()
-                                Store-->>Service: commitResult
-                                alt Фиксация подтверждена
-                                    Service-->>Controller: accepted(versionNumber, checklist, status, history)
-                                else Фиксация не подтверждена
-                                    Service->>Store: rollback_if_active()
-                                    Store-->>Service: transactionClosed
-                                    Service-->>Controller: confirmationUnavailable
-                                end
-                            end
+        Controller->>Service: submitApplication(applicantId, command)
+        Service->>Validator: validate(command)
+        Validator-->>Service: validationResult
+        alt Ошибки обязательных полей анкеты, дат или форматов файлов
+            Service-->>Controller: validationErrors(fields)
+        else Формальные данные и вложения корректны
+            Service->>Policy: evaluateApplicabilityAndDeadline(command.questionnaire)
+            Policy-->>Service: applicabilityResult
+            alt Услуга не требуется (п. 2.1: работа и ранее проходил в РФ ИЛИ п. 2.2: не работа и срок <= 90 дн.)
+                Service-->>Controller: notApplicable(reason)
+            else Услуга применима и рассчитан крайний срок (calculatedDeadline)
+                Service->>Store: beginAndLockSlot(command.slotId, command.serviceId)
+                Store-->>Service: lockedSlotAndServiceOrError
+                alt Транзакция не открыта, услуга неактивна или слот уже занят
+                    Service-->>Controller: slotUnavailableOrStorageError
+                else Транзакция открыта, свободный слот заблокирован
+                    Service->>Application: createNew(applicantId, command, applicabilityResult.deadline)
+                    Application-->>Service: changeSet (заявка, вложения документов, стартовое событие статуса)
+                    Service->>Store: save(changeSet)
+                    Store-->>Service: saveResult
+                    alt Ошибка записи в хранилище
+                        Service->>Store: rollback()
+                        Store-->>Service: rolledBack (слот освобождён)
+                        Service-->>Controller: storageError
+                    else Записи подготовлены в транзакции
+                        Service->>Store: commit()
+                        Store-->>Service: commitResult
+                        alt Фиксация подтверждена
+                            Service-->>Controller: submitted(applicationId, status="Подана", calculatedDeadline, slotInfo)
+                        else Фиксация не подтверждена (потеря соединения)
+                            Service->>Store: rollbackIfActive()
+                            Store-->>Service: transactionClosed
+                            Service-->>Controller: confirmationUnavailable
                         end
                     end
                 end
             end
         end
         Controller-->>Form: submitResult
-        Form-->>Applicant: Подтверждение приёма или пояснение ошибки
+        Form-->>Applicant: Подтверждение подачи (номер заявки и крайний срок) или причина отказа
     end
 ```
 
@@ -124,6 +113,4 @@ sequenceDiagram
 
 ## Основания
 
-Формат lab04 — `class_sequence.md`, ровно один блок `sequenceDiagram`, один явно названный юзкейс и пояснения — установлен [README преподавателя](https://github.com/ekabardinsky/pis_2026_10/blob/master/README.md) и [labs.json](https://github.com/ekabardinsky/pis_2026_10/blob/master/labs.json), повторно прочитанными 26.10.2026. Объекты и методы — решения учебного проекта на основе lab01–lab03. Диаграмма классов lab05 и реализация приложения в эту работу не входят.
-
-Срок исполнения — вычисляемое значение `dueAt`: дата первоначальной подачи плюс 3 календарных дня. Оно доступно обеим ролям; дополнение не переносит срок. Длительность — условие учебной реализации, а не нормативный срок; требование показывать сроки сообщено пользователем по заметке со встречи с преподавателем.
+Формат лабораторной работы № 4 (class_sequence.md, ровно один блок sequenceDiagram с нотацией имя:Класс, фокусировка на одном конкретном прецеденте из lab01 и текстовое обоснование) соответствует требования. Предметные правила применимости, расчёта дедлайнов и статусов полностью согласованы с пунктами 2.1–2.2 дорожной карты, диаграммой прецедентов, ER-моделью и системной диаграммой последовательностей.
