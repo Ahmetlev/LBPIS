@@ -44,6 +44,9 @@ sequenceDiagram
                     opt Дата заблокированного слота позже рассчитанного крайнего срока
                         Service->>Service: сравнить дату слота с calculatedDeadline и отметить slotDeadlineWarning (запись не блокируется)
                     end
+
+                    Service->>Policy: isSlotAfterDeadline(lockedSlot.slotDate, applicabilityResult.deadline)
+                    Policy-->>Service: slotDeadlineWarning
                     Service->>Application: createNew(applicantId, command, applicabilityResult.deadline)
                     Application-->>Service: changeSet (заявка, вложения документов, стартовое событие статуса)
                     Service->>Store: save(changeSet)
@@ -67,7 +70,8 @@ sequenceDiagram
             end
         end
         Controller-->>Form: submitResult
-        Form-->>Applicant: Подтверждение подачи (номер заявки и крайний срок), при выходе за срок — с предупреждением, или причина отказа
+        Form-->>Applicant: Подтверждение подачи (номер заявки, крайний срок и при необходимости предупреждение о позднем слоте) или причина отказа
+
     end
 ```
 
@@ -105,6 +109,7 @@ sequenceDiagram
    * **п. 2.2 (цель `«не работа»`)-** при `plannedStayDays > 90` услуга применима без блокировки по факту прошлой дактилоскопии (в соответствии с дорожной картой), а `calculatedDeadline = entryDate + 90 календарных дней`; при `plannedStayDays <= 90` возвращается `notApplicable`.
 4. **Блокировка слота, сверка срока и подготовка набора изменений-** `store-ApplicationRepository` открывает транзакцию и блокирует строку выбранного `SLOT` (`beginAndLockSlot`) для защиты от двойного бронирования, возвращая дату и время слота. Сервис сравнивает дату слота с рассчитанным крайним сроком (`calculatedDeadline`): если дата слота позже срока, в итоговый результат включается признак `slotDeadlineWarning`, и форма показывает заявителю предупреждение, не блокируя подачу. Доменный класс `Application` методом `createNew` формирует согласованный `changeSet`, включающий новую заявку, привязанные вложения документов и стартовое событие истории.
 5. **Сохранение и фиксация транзакции-** репозиторий записывает `changeSet` методом `save` и выполняет `commit()`. Только после подтверждённой фиксации сервис возвращает контроллеру результат `submitted` с идентификатором заявки, статусом `«Подана»`, рассчитанным дедлайном, признаком выхода даты слота за срок (если есть) и реквизитами записи.
+6. После блокировки слота Service проверяет через FingerprintingPolicy.isSlotAfterDeadline(...), не превышает ли дата слота рассчитанный calculatedDeadline; при выходе за срок формируется неблокирующее предупреждение slotDeadlineWarning, которое передаётся на форму в составе ответа submitted.
 
 ## Целостность данных и обработка альтернатив
 
