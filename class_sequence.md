@@ -68,7 +68,6 @@ sequenceDiagram
         end
         Controller-->>Form: submitResult
         Form-->>Applicant: Подтверждение подачи (номер заявки, крайний срок и при необходимости предупреждение о позднем слоте) или причина отказа
-
     end
 ```
 
