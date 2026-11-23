@@ -41,8 +41,7 @@ sequenceDiagram
                     Store-->>Service: rolledBack (транзакция закрыта, слот не изменён)
                     Service-->>Controller: slotUnavailableOrStorageError
                 else Транзакция открыта, свободный слот заблокирован
-                    opt Дата заблокированного слота позже рассчитанного крайнего срока
-                        Service->>Service: сравнить дату слота с calculatedDeadline и отметить slotDeadlineWarning (запись не блокируется)
+                    Service->>Service: сравнить дату слота с calculatedDeadline и отметить slotDeadlineWarning (запись не блокируется)
                     end
 
                     Service->>Policy: isSlotAfterDeadline(lockedSlot.slotDate, applicabilityResult.deadline)
