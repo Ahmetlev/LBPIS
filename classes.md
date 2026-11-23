@@ -74,6 +74,7 @@ classDiagram
         +evaluateApplicability(goal: EntryGoal, stayDays: int, hasPrevPrints: bool) ApplicabilityResult
         +calculateDeadline(goal: EntryGoal, entryDate: Date, hasPatent: bool, patentDate: Date) Date
         +checkOverdue(calculatedDeadline: Date, currentDate: Date) bool
+        +isSlotAfterDeadline(slotDate: Date, calculatedDeadline: Date) bool
     }
 
     class ApplicationService {
@@ -299,4 +300,5 @@ classDiagram
 ## Основания
 
 Формат документа (`classes.md`, ровно один блок `classDiagram` с указанием атрибутов, методов, типов связей и текстовым обоснованием) соответствует требованиям лабораторной работы № 5 курса ПИС. Состав классов, ролей, статусов и предметных правил полностью согласован с пунктами 2.1–2.2 дорожной карты, [диаграммой прецедентов](use_case.md), [ER-моделью](er.md), [системной диаграммой последовательностей](system_sequence.md) и [диаграммой последовательностей классов](class_sequence.md).
+
 
