@@ -13,7 +13,7 @@ sequenceDiagram
     participant Store as store:ApplicationRepository
     participant Application as application:Application
 
-    Note over Applicant,Application: Операция: подача заявления (UC22; предусловия: UC6, UC7, UC8)
+    Note over Applicant,Application: Операция: подача заявления (UC22; предусловия: UC6, UC7, UC8);
     Note over Applicant,Form: Заявитель открыл форму услуги, заполнил анкету, приложил файлы и выбрал слот
     Applicant->>Form: Нажать «Подать заявление»
     Form->>Controller: submitApplication(sessionToken, command)
