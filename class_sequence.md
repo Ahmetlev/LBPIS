@@ -13,7 +13,7 @@ sequenceDiagram
     participant Store as store:ApplicationRepository
     participant Application as application:Application
 
-    Note over Applicant,Application: Операция: подача заявления (UC6, UC7, UC8, UC22)
+    Note over Applicant,Application: Операция: подача заявления (UC22; предусловия: UC6, UC7, UC8)
     Note over Applicant,Form: Заявитель открыл форму услуги, заполнил анкету, приложил файлы и выбрал слот
     Applicant->>Form: Нажать «Подать заявление»
     Form->>Controller: submitApplication(sessionToken, command)
@@ -41,11 +41,10 @@ sequenceDiagram
                     Store-->>Service: rolledBack (транзакция закрыта, слот не изменён)
                     Service-->>Controller: slotUnavailableOrStorageError
                 else Транзакция открыта, свободный слот заблокирован
-                     Service->>Service: сравнить дату слота с calculatedDeadline и отметить slotDeadlineWarning (запись не блокируется)
-                    end
-
                     Service->>Policy: isSlotAfterDeadline(lockedSlot.slotDate, applicabilityResult.deadline)
                     Policy-->>Service: slotDeadlineWarning
+                    Service->>Application: createNew(applicantId, command, applicabilityResult.deadline)
+                    Application-->>Service: changeSet (заявка, вложения документов, стартовое событие статуса)
                     Service->>Store: save(changeSet)
                     Store-->>Service: saveResult
                     alt Ошибка записи в хранилище
@@ -66,11 +65,9 @@ sequenceDiagram
                 end
             end
         end
-
         Controller-->>Form: submitResult
         Form-->>Applicant: Подтверждение подачи (номер заявки, крайний срок и при необходимости предупреждение о позднем слоте) или причина отказа
     end
-
 ```
 
 ## Выбранный прецедент
