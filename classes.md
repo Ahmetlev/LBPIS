@@ -81,7 +81,7 @@ classDiagram
         +evaluateApplicabilityAndDeadline(command: SubmitApplicationCommand) ApplicabilityDecision
         +evaluateApplicability(goal: EntryGoal, stayDays: int, hasPrevPrints: bool) ApplicabilityResult
         +calculateDeadline(goal: EntryGoal, entryDate: Date, appliesForPatent: bool, patentDate: Date) Date
-        +checkOverdue(calculatedDeadline: Date, currentDate: Date) bool
+        +checkOverdue(calculatedDeadline: Date, procedureDate: Date) bool
         +isSlotAfterDeadline(slotDate: Date, calculatedDeadline: Date) bool
     }
 
@@ -187,7 +187,7 @@ classDiagram
         +Date calculatedDeadline
         +ApplicationStatus currentStatus
         +DateTime createdAt
-        +createNew(applicantId: UUID, cmd: SubmitApplicationCommand, deadline: Date)$ ApplicationChangeSet
+        +createNew(applicantId: UUID, cmd: SubmitApplicationCommand, deadline: Date) ApplicationChangeSet$
         +transitionTo(newStatus: ApplicationStatus, actorId: UUID, comment: String) StatusEvent
         +canBeCompleted() bool
     }
@@ -295,7 +295,7 @@ classDiagram
 
 2. **Слой прикладной логики и предметных правил (Services & Domain Policies)**
    * `ApplicationValidator` — выполняет формальную проверку входных команд, обязательных реквизитов анкеты, логической согласованности дат и допустимых форматов/размеров приложенных сканов документов.
-   * `FingerprintingPolicy` — инкапсулирует бизнес-правила пунктов 2.1 и 2.2 дорожной карты: определяет применимость процедуры (`evaluateApplicability`), рассчитывает нормативный крайний срок (`calculateDeadline`) — **30 календарных дней со дня въезда для цели «работа» (при этом дата обращения за патентом заменяет 30-дневный срок только в том случае, если обращение за патентом происходит раньше)** либо **90 календарных дней со дня въезда для иных целей пребывания свыше 90 суток**, а также проверяет соблюдение срока по дате выбранного слота и фактической дате прохождения процедуры (`checkOverdue`).
+   * `FingerprintingPolicy` — инкапсулирует бизнес-правила пунктов 2.1 и 2.2 дорожной карты: определяет применимость процедуры (`evaluateApplicability`), рассчитывает нормативный крайний срок (`calculateDeadline`) — **30 календарных дней со дня въезда для цели «работа» (при этом дата обращения за патентом заменяет 30-дневный срок только в том случае, если обращение за патентом происходит раньше)** либо **90 календарных дней со дня въезда для иных целей пребывания свыше 90 суток**, а также сравнивает с рассчитанным сроком дату выбранного слота (`isSlotAfterDeadline`) и фактическую дату процедуры (`checkOverdue`).
    * `ApplicationService` — координирует жизненный цикл обращения: управляет транзакциями при подаче заявки, запускает цикл проверки и возврата на доработку, контролирует наличие подтверждённого результата перед переводом заявки в статус «Завершена».
    * `CatalogService` — отвечает за выборку свободных слотов по подразделениям и ведение справочников услуг и расписания. Для UC4 контроллер проверяет сеанс заявителя и вызывает `CatalogService.getAvailableServices()`, который читает активные услуги через `CatalogRepository.findActiveServices()`. Для выбора места `CatalogService` проверяет, что выбрана активная услуга дактилоскопии и фотографирования, читает справочник подразделений, получает свободные слоты каждого и возвращает `DivisionAvailability` с названием, адресом и временем приёма.
 
@@ -312,7 +312,7 @@ classDiagram
 * **Применимость и расчёт срока (`FingerprintingPolicy`)**
   * метод `evaluateApplicability` блокирует создание заявки при цели `WORK` (п. 2.1), если `hasPrevPrints == true`, и при цели `NON_WORK` (п. 2.2), если `stayDays <= 90`;
   * метод `calculateDeadline` для цели `WORK` возвращает дату обращения за патентом (`patentDate`), если обращение есть и оно наступает раньше базового срока, в остальных случаях — `entryDate + 30 календарных дней` со дня въезда; для цели `NON_WORK` (> 90 дней) — `entryDate + 90 календарных дней`;
-  * метод `checkOverdue` сравнивает дату с `calculatedDeadline` в двух местах жизненного цикла: при выборе слота — дату слота (`slotDate`, предупреждение заявителю при выходе за срок, запись не блокируется), при фиксации результата — фактическую дату процедуры (`procedureDate`); при просрочке фиксируется замечание с оценкой `WARNING`, которое не блокирует завершение заявки.
+  * при бронировании сервис блокирует слот и вызывает `isSlotAfterDeadline(slotDate, calculatedDeadline)`. Если `slotDate > calculatedDeadline`, заявитель видит предупреждение `slotDeadlineWarning` и может продолжить запись. При фиксации результата сервис вызывает `checkOverdue(calculatedDeadline, procedureDate)`. Если `procedureDate > calculatedDeadline`, система сохраняет замечание `WARNING` и позволяет завершить заявку.
 * **Транзакционная целостность бронирования (`Slot` и `ApplicationRepository`)**
   * при подаче заявки `ApplicationRepository.beginAndLockSlot` блокирует строку `Slot`, метод `Slot.reserve()` переводит `isAvailable` в `false`, а статический фабричный метод `Application.createNew(...)` формирует согласованный набор (`Application`, `Document`, стартовый `StatusEvent`).
 * **Контроль завершённости (`Application` и `Result`):**
